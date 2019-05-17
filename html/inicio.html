@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <title>Administrador de cuestiones</title>
+    <meta name="author" content="Florencia Miranda" />
+    <meta charset="utf-8" />
+
+    <!-- Importar bootstrap-->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="../css/inicio-cuestiones.css"
+    />
+    <script src="../js/inicio_cuestiones.js"></script>
+  </head>
+
+  <body onload="cargar_cuestiones();">
+    <nav class="navbar navbar-light navbar-expand-lg ">
+      <a class="navbar-brand" href="#">Cuestiones</a>
+      <div class="collapse navbar-collapse justify-content-end">
+        <ul class="navbar-nav">
+          <li class="nav-item active">
+            <a class="nav-link" href="login.html">
+              <!-- title hace que apareza un mensaje al pasar el mouse sobre la img-->
+              <img
+                src="../icons/build/svg/sign-out.svg"
+                width="30"
+                height="30"
+                alt="Salir"
+                title="Salir"
+              />
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="container" id="container">
+      <!-- <span class="delete-btn">
+        <a href="login.html" class="btn btn-dark btn-sm">Salir</a>
+      </span> -->
+      <h3>Cuestiones</h3>
+      <main id="cuestiones"></main>
+      <div class="card" id="agregar_cuestion">
+        <div class="card-body">
+          <form
+            action="./pagina_cuestion_profesor.html"
+            class="cuestion-input"
+            onsubmit="return agregar_cuestion()"
+          >
+            <!-- el input tiene required para que obligue a poner algo en la cuestion-->
+            <input
+              id="id_nueva_cuestion"
+              type="text"
+              class="form-control "
+              placeholder="Nueva cuestión"
+              required
+            />
+
+            <button class="btn btn-primary" type="submit">
+              Agregar
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

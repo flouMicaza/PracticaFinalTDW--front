@@ -1,0 +1,18 @@
+.delete-btn {
+  float: right;
+}
+.container {
+  margin: 5% auto;
+}
+.navbar {
+  background-color: #e3f2fd;
+}
+
+.cuestion-input input {
+  width: 40%;
+  float: left;
+}
+
+.cuestion-input .btn {
+  float: right;
+}

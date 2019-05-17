@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <title>Administrador de cuestiones</title>
+    <meta name="author" content="Florencia Miranda" />
+    <meta charset="utf-8" />
+
+    <!-- Importar bootstrap-->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" type="text/css" href="../css/pagina-cuestion.css" />
+    <script src="../js/inicio_cuestion_a.js"></script>
+  </head>
+
+  <body onload="cargar_cuestion();">
+    <nav class="navbar navbar-light navbar-expand-lg ">
+      <a class="navbar-brand" href="#">Cuestiones</a>
+      <div class="collapse navbar-collapse justify-content-end">
+        <ul class="navbar-nav">
+          <li class="nav-item active">
+            <a class="nav-link" href="login.html">
+              <!-- title hace que apareza un mensaje al pasar el mouse sobre la img-->
+              <img
+                src="../icons/build/svg/sign-out.svg"
+                width="30"
+                height="30"
+                alt="Salir"
+                title="Salir"
+              />
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="d-flex justify-content-between" id="header_enunciado">
+        <a
+          href="./inicio.html"
+          class="close"
+          aria-label="Close"
+          id="cerrar_cuestion"
+        >
+          <span>&times;</span>
+        </a>
+      </div>
+
+      <form>
+        <div class="form-row">
+          <div class="col-auto" id="label_solucion">
+            <label>Propuesta de solución </label>
+          </div>
+          <!-- el input tiene required para que obligue a poner algo en la cuestion-->
+          <div class="col-7" id="text_propuesta">
+            <textarea
+              class="form-control "
+              placeholder="Nueva solución"
+              required
+              id="propuesta_de_solucion"
+            ></textarea>
+          </div>
+          <div class="col-auto" id="div_boton_enviar">
+            <input
+              type="button"
+              class="btn btn-primary"
+              onclick="return enviar_propuesta();"
+              value="Enviar"
+              id="boton_enviar"
+            />
+          </div>
+        </div>
+      </form>
+      <hr />
+      <main id="soluciones_main"></main>
+    </div>
+  </body>
+</html>
