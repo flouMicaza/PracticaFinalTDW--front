@@ -10,16 +10,16 @@
       rel="stylesheet"
       href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css"
     />
-
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
     <link rel="stylesheet" type="text/css" href="../css/login.css" />
     <script src="../js/login.js"></script>
   </head>
-  <body>
+  <body onload="inicioLogin();">
     <div class="contenedor">
       <h1>Iniciar sesión</h1>
       <!-- junbotron es un clase de bootstrap-->
       <div class="jumbotron">
-        <form id="login" onsubmit="return validacion();">
+        <form id="loginForm" action="login.html">
           <div class="form-group" id="div_user">
             <label for="user">Usuario</label>
             <input
@@ -39,7 +39,7 @@
             />
           </div>
           <div id="div_input">
-            <input type="submit" value="Iniciar sesión" />
+            <input type="button" id="botonLogin" value="Iniciar sesión" />
           </div>
         </form>
       </div>
