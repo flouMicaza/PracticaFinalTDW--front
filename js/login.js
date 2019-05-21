@@ -3,21 +3,21 @@ function inicioLogin() {
     var nombre = $("#user").val();
     var contrasena = $("#contrasena").val();
     console.log("holaaa", nombre, " ", contrasena);
-    $.post(
-      "http://localhost:8000/api/v1/login",
-      {
+    $.ajax({
+      url: "http://localhost:8000/api/v1/login",
+      type: "POST",
+      data: {
         _username: nombre,
         _password: contrasena
       },
-      function(data, status) {
-        console.log(status);
-        if (status == "success") {
-          location.href = "inicio.html";
-        } else {
-          alert("fallo");
-        }
+      success: function(data, textStatus) {
+        alert("success", data);
+        location.href = "inicio.html";
+      },
+      error: function(XMLHttpRequest, textStatus, errorThrown) {
+        alert("fail " + textStatus, +"gola");
       }
-    );
+    });
   });
 }
 
