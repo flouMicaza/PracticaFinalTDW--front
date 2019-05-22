@@ -1,17 +1,36 @@
-function cargar_cuestiones() {
-  var datos = JSON.parse(window.localStorage.getItem("datos"));
-  var usuario = JSON.parse(window.localStorage.getItem("usuarioRegistrado"));
-  var cuestiones = datos.cuestiones;
+//Hacer un get a la api y traer todas las cuesiones del usuario.
+function get_cuestiones() {
+  console.log("esta ready");
+  $(document).ready(function() {
+    $.ajax({
+      url: "http://localhost:8000/api/v1/questions",
+      type: "GET",
+      // Fetch the stored token from localStorage and set in the header
+      headers: { Authorization: "Bearer " + localStorage.getItem("token") },
+      success: function(data, textStatus) {
+        cargar_cuestiones(data["cuestiones"]);
+      },
+      error: function(XMLHttpRequest, textStatus, errorThrown) {
+        alert("FAil!");
+      }
+    });
+  });
+}
+
+function cargar_cuestiones(cuestiones) {
+  usuarioActual = JSON.parse(window.localStorage.getItem("usuarioRegistrado"));
+  tipoUsuario = usuarioActual["isMaestro"] ? "maestro" : "aprendiz";
+
   var main_cuestiones = document.getElementById("cuestiones");
 
   //crear la lista de cuestiones
   for (let cuestion of cuestiones) {
-    var nueva_cuestion = crear_cuestion(cuestion, usuario.tipo);
+    var nueva_cuestion = crear_cuestion(cuestion["cuestion"], tipoUsuario);
     main_cuestiones.appendChild(nueva_cuestion);
   }
 
   //si es alumno elimino del dom el elemento para agregar cuestiones
-  if (usuario.tipo == "aprendiz") {
+  if (tipoUsuario == "aprendiz") {
     var container = document.getElementById("container");
     var div_agregar_cuestion = document.getElementById("agregar_cuestion");
     container.removeChild(div_agregar_cuestion);
@@ -26,9 +45,9 @@ function crear_link_cuestion(cuestion, tipo) {
     link = "pagina_cuestion_alumno.html";
   }
   var link_cuestion = document.createElement("a");
-  link_cuestion.id = "link_clave" + cuestion.clave;
+  link_cuestion.id = "link_clave" + cuestion.idCuestion;
   link_cuestion.href = link;
-  var mensaje = document.createTextNode(cuestion.enunciado);
+  var mensaje = document.createTextNode(cuestion.enunciadoDescripcion);
   link_cuestion.appendChild(mensaje);
   link_cuestion.onclick = () => {
     window.localStorage.setItem("cuestion_actual", JSON.stringify(cuestion));
@@ -40,9 +59,8 @@ function crear_link_cuestion(cuestion, tipo) {
 function crear_boton_eliminar(cuestion) {
   var span_eliminar = document.createElement("span");
   span_eliminar.className = "delete-btn";
-  var boton_eliminar = document.createElement("a");
-  boton_eliminar.id = "eliminar_" + cuestion.clave;
-  boton_eliminar.href = "inicio.html";
+  var boton_eliminar = document.createElement("button");
+  boton_eliminar.id = "eliminar_" + cuestion.idCuestion;
   boton_eliminar.className = "btn btn-danger";
   boton_eliminar.onclick = eliminar_cuestion;
   var mensaje_boton = document.createTextNode("Eliminar");
@@ -76,12 +94,25 @@ function crear_cuestion(cuestion, tipo) {
 //eliminar_cuestion: funcion que eliminar una cuestion completa del localStorage.
 //Se edita el json y se vuelve a setear.
 function eliminar_cuestion() {
-  var datos = JSON.parse(window.localStorage.getItem("datos"));
+  console.log("eliminando");
   var id_cuestion = this.id.split("_")[1];
-  var nuevas_cuestiones = encontrar_cuestion(datos.cuestiones, id_cuestion);
-
-  datos.cuestiones = nuevas_cuestiones;
-  window.localStorage.setItem("datos", JSON.stringify(datos));
+  console.log(id_cuestion);
+  $.ajax({
+    url: "http://127.0.0.1/api/v1/questions/" + id_cuestion,
+    method: "DELETE",
+    // Fetch the stored token from localStorage and set in the header
+    headers: {
+      Authorization: "Bearer " + localStorage.getItem("token"),
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS, DELETE"
+    },
+    crossDomain: true,
+    success: function(data, textStatus) {
+      console.log("elimina3", textStatus);
+    },
+    error: function(XMLHttpRequest, textStatus, errorThrown) {
+      alert("Fail!", errorThrown);
+    }
+  });
 }
 
 function encontrar_cuestion(cuestiones, id) {
