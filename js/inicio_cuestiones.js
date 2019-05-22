@@ -12,14 +12,22 @@ function get_cuestiones() {
       },
       error: function(XMLHttpRequest, textStatus, errorThrown) {
         if (errorThrown == "Not Found") {
-          alert("No hay cuestiones!");
-          $("#cuestiones").html(
-            "<div class='card'><div class='card-body'><p class='card-text'>No hay cuestiones disponibles</p></div></div>"
-          );
+          noHayCuestiones();
         }
       }
     });
   });
+}
+
+function noHayCuestiones() {
+  usuarioActual = JSON.parse(window.localStorage.getItem("usuarioRegistrado"));
+  tipoUsuario = usuarioActual["isMaestro"] ? "maestro" : "aprendiz";
+  if (tipoUsuario == "aprendiz") {
+    $("#agregar_cuestion").remove();
+  }
+  $("#cuestiones").html(
+    "<div class='card'><div class='card-body'><p class='card-text'>No hay cuestiones disponibles</p></div></div>"
+  );
 }
 
 function cargar_cuestiones(cuestiones) {
@@ -33,12 +41,14 @@ function cargar_cuestiones(cuestiones) {
     var nueva_cuestion = crear_cuestion(cuestion["cuestion"], tipoUsuario);
     main_cuestiones.appendChild(nueva_cuestion);
   }
+  console.log("tipo", tipoUsuario);
 
   //si es alumno elimino del dom el elemento para agregar cuestiones
   if (tipoUsuario == "aprendiz") {
-    var container = document.getElementById("container");
-    var div_agregar_cuestion = document.getElementById("agregar_cuestion");
-    container.removeChild(div_agregar_cuestion);
+    $("#agregar_cuestion").remove();
+    // var container = $("#container");
+    // var div_agregar_cuestion = ("agregar_cuestion");
+    // container.removeChild(div_agregar_cuestion);
   }
 }
 
