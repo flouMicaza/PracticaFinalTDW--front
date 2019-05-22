@@ -11,7 +11,12 @@ function get_cuestiones() {
         cargar_cuestiones(data["cuestiones"]);
       },
       error: function(XMLHttpRequest, textStatus, errorThrown) {
-        alert("FAil!");
+        if (errorThrown == "Not Found") {
+          alert("No hay cuestiones!");
+          $("#cuestiones").html(
+            "<div class='card'><div class='card-body'><p class='card-text'>No hay cuestiones disponibles</p></div></div>"
+          );
+        }
       }
     });
   });
