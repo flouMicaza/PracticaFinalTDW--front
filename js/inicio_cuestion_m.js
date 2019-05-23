@@ -3,28 +3,51 @@ function cargar_cuestion() {
   var cuestion_actual = JSON.parse(
     window.localStorage.getItem("cuestion_actual")
   );
+  console.log(cuestion_actual);
   var div_nombre = document.getElementById("enunciado");
 
   div_nombre.appendChild(crear_enunciado_cuestion(cuestion_actual));
 
   var switch_activar = document.getElementById("activacion_cuestion");
-  switch_activar.checked = cuestion_actual.disponible;
+  switch_activar.checked = cuestion_actual.enunciadoDisponible;
   switch_activar.onchange = cambio_estado;
-  var soluciones_main = document.getElementById("soluciones");
 
-  for (let solucion of cuestion_actual.soluciones) {
-    var card_solucion = crear_html_solucion(solucion);
-    soluciones_main.appendChild(card_solucion);
-    var mi_hr = document.createElement("hr");
-    soluciones_main.appendChild(mi_hr);
-  }
+  cargar_soluciones(cuestion_actual.idCuestion);
 }
 
+function cargar_soluciones(idCuestion) {
+  $.ajax({
+    url: "http://localhost:8000/api/v1/solutions/" + idCuestion,
+    type: "GET",
+    // Fetch the stored token from localStorage and set in the header
+    headers: { Authorization: "Bearer " + localStorage.getItem("token") },
+    success: function(data, textStatus) {
+      //TODO: lo que dice el alert
+
+      for (let solucion of data["soluciones"]) {
+        solucion = solucion["soluciones"];
+        console.log("una sol: ", solucion);
+
+        var soluciones_main = document.getElementById("soluciones");
+        var card_solucion = crear_html_solucion(solucion);
+        soluciones_main.appendChild(card_solucion);
+        var mi_hr = document.createElement("hr");
+        soluciones_main.appendChild(mi_hr);
+      }
+    },
+    error: function(XMLHttpRequest, textStatus, errorThrown) {
+      if (errorThrown == "Not Found") {
+        alert("Mala solucion");
+      }
+    },
+    dataType: "json"
+  });
+}
 function crear_html_solucion(solucion) {
   //form
   var sol_form = document.createElement("form");
   sol_form.onsubmit = editar_solucion;
-  sol_form.id = "form_" + solucion.clave;
+  sol_form.id = "form_" + solucion.idsoluciones;
 
   //divs interiores
   var div_form = document.createElement("div");
@@ -59,11 +82,12 @@ function crear_enunciado_cuestion(cuestion_actual) {
   var input_nombre = document.createElement("input");
   input_nombre.type = "text";
   input_nombre.className = "form-control";
-  input_nombre.value = cuestion_actual.enunciado;
+  input_nombre.value = cuestion_actual.enunciadoDescripcion;
   input_nombre.required = true;
   input_nombre.id = "input_nombre";
   return input_nombre;
 }
+//TODO: en cambio_estado_solucion arreglar para que use ajax
 function crear_switch(solucion) {
   var div_switch = document.createElement("div");
   div_switch.className = "custom_control custom-switch";
@@ -71,8 +95,7 @@ function crear_switch(solucion) {
   var input_switch = document.createElement("input");
   input_switch.type = "checkbox";
   input_switch.className = "custom-control-input";
-  input_switch.id = "switch_" + solucion.clave;
-  //input_switch.onchange = cambio_estado;
+  input_switch.id = "switch_" + solucion.idsoluciones;
   input_switch.checked = solucion.correcta;
   input_switch.onchange = cambio_estado_solucion;
   div_switch.appendChild(input_switch);
@@ -92,7 +115,7 @@ function crear_input_solucion(solucion) {
   input_sol.className = "form-control";
   input_sol.value = solucion.descripcion;
   input_sol.required = true;
-  input_sol.id = "textarea_" + solucion.clave;
+  input_sol.id = "textarea_" + solucion.idsoluciones;
 
   div_sol.appendChild(input_sol);
   return div_sol;
@@ -115,7 +138,7 @@ function crear_botones_solucion(solucion) {
   var boton_eliminar = document.createElement("button");
   boton_eliminar.className = "btn btn-danger ";
   boton_eliminar.type = "button";
-  boton_eliminar.id = "eliminar_" + solucion.clave;
+  boton_eliminar.id = "eliminar_" + solucion.idsolciones;
   var texto2 = document.createTextNode("Eliminar solución");
   boton_eliminar.appendChild(texto2);
   boton_eliminar.onclick = eliminar_solucion;
@@ -196,6 +219,7 @@ function agregar_sol_a_cuestion(nueva_solucion, cuestion_actual, cuestiones) {
   return nuevas_cuestiones;
 }
 
+//TODO: hacer esta funcion con el ajax
 function editar_solucion() {
   var id_solucion = this.id[5] + this.id[6];
   var enunciado_sol = document.getElementById("textarea_" + id_solucion);
@@ -315,27 +339,24 @@ function cambio_estado() {
   var cuestion_actual = JSON.parse(
     window.localStorage.getItem("cuestion_actual")
   );
-  var datos = JSON.parse(window.localStorage.getItem("datos"));
-  var nueva_cuestion = cambiar_estado_cuestion(
-    datos.cuestiones,
-    cuestion_actual
-  );
-  datos.cuestiones = nueva_cuestion;
-  window.localStorage.setItem("datos", JSON.stringify(datos));
-  cuestion_actual.disponible = !cuestion_actual.disponible;
-  window.localStorage.setItem(
-    "cuestion_actual",
-    JSON.stringify(cuestion_actual)
-  );
-}
 
-function cambiar_estado_cuestion(cuestiones, cuestion_actual) {
-  var nuevas_cuestiones = [];
-  for (let cuestion of cuestiones) {
-    if (cuestion.clave == cuestion_actual.clave) {
-      cuestion.disponible = !cuestion.disponible;
-    }
-    nuevas_cuestiones.push(cuestion);
-  }
-  return nuevas_cuestiones;
+  $.ajax({
+    url: "http://localhost:8000/api/v1/questions/" + cuestion_actual.idCuestion,
+    type: "PUT",
+    // Fetch the stored token from localStorage and set in the header
+    headers: { Authorization: "Bearer " + localStorage.getItem("token") },
+    success: function(data, textStatus) {
+      //TODO: lo que dice el alert
+      alert("que ahora la cuestion actual sea lo que retorna el put, data");
+    },
+    data: {
+      enunciadoDisponible: !cuestion_actual.enunciadoDisponible
+    },
+    error: function(XMLHttpRequest, textStatus, errorThrown) {
+      if (errorThrown == "Not Found") {
+        alert("hubo un problema con la cuestion");
+      }
+    },
+    dataType: "json"
+  });
 }
