@@ -39,6 +39,22 @@
     </nav>
 
     <div class="container">
+      <div
+        class="alert alert-success alert-dismissible fade show"
+        style="display:none"
+        role="alert"
+        id="alertaCambioEnunciado"
+      >
+        Se ha cambiado el enunciado!
+        <button
+          type="button"
+          class="close"
+          data-dismiss="alert"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
       <!-- class d-flex justify content emd permite poner el  botón para salir en el final-->
       <div class="d-flex justify-content-end">
         <!-- botón para salir-->
@@ -46,10 +62,7 @@
           <span>&times;</span>
         </a>
       </div>
-      <form
-        action="./pagina_cuestion_profesor.html"
-        onsubmit="return cambio_enunciado()"
-      >
+      <form action="./pagina_cuestion_profesor.html">
         <div class="form-row">
           <div class="col-auto">
             <label>Enunciado</label>
@@ -66,7 +79,11 @@
           </div>
           <div class="col-8" id="enunciado"></div>
           <div class="col-auto">
-            <button class="btn btn-primary" type="submit">
+            <button
+              class="btn btn-primary"
+              type="button"
+              onclick="return cambio_enunciado()"
+            >
               Cambiar enunciado
             </button>
           </div>

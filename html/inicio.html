@@ -50,11 +50,7 @@
       <main id="cuestiones"></main>
       <div class="card" id="agregar_cuestion">
         <div class="card-body">
-          <form
-            action="./pagina_cuestion_profesor.html"
-            class="cuestion-input"
-            onsubmit="return agregar_cuestion()"
-          >
+          <form action="./pagina_cuestion_profesor.html" class="cuestion-input">
             <!-- el input tiene required para que obligue a poner algo en la cuestion-->
             <input
               id="id_nueva_cuestion"
@@ -64,7 +60,11 @@
               required
             />
 
-            <button class="btn btn-primary" type="submit">
+            <button
+              class="btn btn-primary"
+              type="button"
+              onclick="agregar_cuestion();"
+            >
               Agregar
             </button>
           </form>

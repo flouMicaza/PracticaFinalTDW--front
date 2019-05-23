@@ -1,6 +1,5 @@
 //Hacer un get a la api y traer todas las cuesiones del usuario.
 function get_cuestiones() {
-  console.log("esta ready");
   $(document).ready(function() {
     $.ajax({
       url: "http://localhost:8000/api/v1/questions",
@@ -8,7 +7,7 @@ function get_cuestiones() {
       // Fetch the stored token from localStorage and set in the header
       headers: { Authorization: "Bearer " + localStorage.getItem("token") },
       success: function(data, textStatus) {
-        cargar_cuestiones(data["cuestiones"]);
+        cargar_cuestiones(data.cuestiones);
       },
       error: function(XMLHttpRequest, textStatus, errorThrown) {
         if (errorThrown == "Not Found") {
@@ -20,8 +19,10 @@ function get_cuestiones() {
 }
 
 function noHayCuestiones() {
-  usuarioActual = JSON.parse(window.localStorage.getItem("usuarioRegistrado"));
-  tipoUsuario = usuarioActual["isMaestro"] ? "maestro" : "aprendiz";
+  var usuarioActual = JSON.parse(
+    window.localStorage.getItem("usuarioRegistrado")
+  );
+  var tipoUsuario = usuarioActual.isMaestro ? "maestro" : "aprendiz";
   if (tipoUsuario == "aprendiz") {
     $("#agregar_cuestion").remove();
   }
@@ -31,24 +32,22 @@ function noHayCuestiones() {
 }
 
 function cargar_cuestiones(cuestiones) {
-  usuarioActual = JSON.parse(window.localStorage.getItem("usuarioRegistrado"));
-  tipoUsuario = usuarioActual["isMaestro"] ? "maestro" : "aprendiz";
+  var usuarioActual = JSON.parse(
+    window.localStorage.getItem("usuarioRegistrado")
+  );
+  var tipoUsuario = usuarioActual.isMaestro ? "maestro" : "aprendiz";
 
   var main_cuestiones = document.getElementById("cuestiones");
 
   //crear la lista de cuestiones
   for (let cuestion of cuestiones) {
-    var nueva_cuestion = crear_cuestion(cuestion["cuestion"], tipoUsuario);
+    var nueva_cuestion = crear_cuestion(cuestion.cuestion, tipoUsuario);
     main_cuestiones.appendChild(nueva_cuestion);
   }
-  console.log("tipo", tipoUsuario);
 
   //si es alumno elimino del dom el elemento para agregar cuestiones
   if (tipoUsuario == "aprendiz") {
     $("#agregar_cuestion").remove();
-    // var container = $("#container");
-    // var div_agregar_cuestion = ("agregar_cuestion");
-    // container.removeChild(div_agregar_cuestion);
   }
 }
 
@@ -109,58 +108,56 @@ function crear_cuestion(cuestion, tipo) {
 //eliminar_cuestion: funcion que eliminar una cuestion completa del localStorage.
 //Se edita el json y se vuelve a setear.
 function eliminar_cuestion() {
-  console.log("eliminando");
   var id_cuestion = this.id.split("_")[1];
-  console.log(id_cuestion);
+
   $.ajax({
-    url: "http://127.0.0.1/api/v1/questions/" + id_cuestion,
-    method: "DELETE",
+    url: "http://127.0.0.1:8000/api/v1/questions/" + id_cuestion,
+    type: "DELETE",
     // Fetch the stored token from localStorage and set in the header
     headers: {
-      Authorization: "Bearer " + localStorage.getItem("token"),
-      "Access-Control-Allow-Methods": "GET, POST, OPTIONS, DELETE"
+      Authorization: "Bearer " + localStorage.getItem("token")
     },
-    crossDomain: true,
     success: function(data, textStatus) {
-      console.log("elimina3", textStatus);
+      alert("elimino", textStatus);
+
+      location.href = "inicio.html";
     },
     error: function(XMLHttpRequest, textStatus, errorThrown) {
-      alert("Fail!", errorThrown);
-    }
+      alert("Fail eliminacion!", errorThrown);
+    },
+    dataType: "json"
   });
 }
 
-function encontrar_cuestion(cuestiones, id) {
-  var nuevas_cuestiones = [];
-  for (let cuestion of cuestiones) {
-    if (cuestion.clave != id) {
-      nuevas_cuestiones.push(cuestion);
-    }
-  }
-  return nuevas_cuestiones;
-}
-
+//TODO: arreglar esto y lo del CORS mierda
 function agregar_cuestion() {
-  var datos = JSON.parse(window.localStorage.getItem("datos"));
-  var nombre = document.getElementById("id_nueva_cuestion");
-  var cuestiones = datos.cuestiones;
-
-  var ultima_cuestion = cuestiones[cuestiones.length - 1];
-
-  var nueva_clave = "c" + (parseInt(ultima_cuestion.clave[1]) + 1);
-  var nueva_cuestion = {
-    clave: nueva_clave,
-    disponible: false,
-    enunciado: nombre.value,
-    soluciones: []
-  };
-
-  cuestiones.push(nueva_cuestion);
-  datos.cuestiones = cuestiones;
-  window.localStorage.setItem("datos", JSON.stringify(datos));
-  window.localStorage.setItem(
-    "cuestion_actual",
-    JSON.stringify(nueva_cuestion)
+  var nombre = $("#id_nueva_cuestion").val();
+  //agregar la cuestion a la base de datos
+  var usuarioActual = JSON.parse(
+    window.localStorage.getItem("usuarioRegistrado")
   );
-  return true;
+  var data = {
+    enunciadoDescripcion: nombre,
+    enunciadoDisponible: true,
+    creador: usuarioActual.user_id,
+    estado: "abierta"
+  };
+  $.ajax({
+    url: "http://127.0.0.1:8000/api/v1/questions",
+    type: "POST",
+    // Fetch the stored token from localStorage and set in the header
+    headers: {
+      Authorization: "Bearer " + localStorage.getItem("token")
+    },
+    data: data,
+    success: function(data, textStatus) {
+      alert("Se creó la cuestion");
+
+      location.href = "inicio.html";
+    },
+    error: function(XMLHttpRequest, textStatus, errorThrown) {
+      alert("Fail!", errorThrown);
+    },
+    dataType: "json"
+  });
 }

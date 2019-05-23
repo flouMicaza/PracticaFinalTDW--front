@@ -3,7 +3,6 @@ function cargar_cuestion() {
   var cuestion_actual = JSON.parse(
     window.localStorage.getItem("cuestion_actual")
   );
-  console.log(cuestion_actual);
   var div_nombre = document.getElementById("enunciado");
 
   div_nombre.appendChild(crear_enunciado_cuestion(cuestion_actual));
@@ -24,9 +23,8 @@ function cargar_soluciones(idCuestion) {
     success: function(data, textStatus) {
       //TODO: lo que dice el alert
 
-      for (let solucion of data["soluciones"]) {
-        solucion = solucion["soluciones"];
-        console.log("una sol: ", solucion);
+      for (let solucion of data.soluciones) {
+        solucion = solucion.soluciones;
 
         var soluciones_main = document.getElementById("soluciones");
         var card_solucion = crear_html_solucion(solucion);
@@ -37,7 +35,7 @@ function cargar_soluciones(idCuestion) {
     },
     error: function(XMLHttpRequest, textStatus, errorThrown) {
       if (errorThrown == "Not Found") {
-        alert("Mala solucion");
+        alert("No hay solucion");
       }
     },
     dataType: "json"
@@ -296,43 +294,38 @@ function cambiar_estado_solucion(cuestiones, cuestion_actual, id_sol) {
   return nuevas_cuestiones;
 }
 //funcion que toma el nuevo enunciado, comprueba que se haya modificado.
-//Si se modificó el enunciado, lo setea en los datos de localstorage y en cuestion_actual.
+//Si se modificó el enunciado, lo setea en los datos de la BD y en cuestion_actual.
 function cambio_enunciado() {
   var cuestion_actual = JSON.parse(
     window.localStorage.getItem("cuestion_actual")
   );
+  console.log(cuestion_actual);
   var nuevo_enunciado = window.document.getElementById("input_nombre").value;
-  if (nuevo_enunciado != cuestion_actual.enunciado) {
-    var datos = JSON.parse(window.localStorage.getItem("datos"));
-    var cuestiones = datos.cuestiones;
-    cuestiones = cambiar_cuestion(
-      cuestiones,
-      cuestion_actual.clave,
-      nuevo_enunciado
-    );
-    datos.cuestiones = cuestiones;
 
-    window.localStorage.setItem("datos", JSON.stringify(datos));
-    cuestion_actual.enunciado = nuevo_enunciado;
-
-    window.localStorage.setItem(
-      "cuestion_actual",
-      JSON.stringify(cuestion_actual)
-    );
-  }
-}
-
-/*Funcion que busca la cuestion a cambiar y le cambia la clave.
- Genera un nuevo arreglo de cuestiones con las mismas que habian antes y con la que se modificó */
-function cambiar_cuestion(cuestiones, id, nuevo_enunciado) {
-  var nuevas_cuestiones = [];
-  for (let cuestion of cuestiones) {
-    if (cuestion.clave == id) {
-      cuestion.enunciado = nuevo_enunciado;
+  $.ajax({
+    url: "http://localhost:8000/api/v1/questions/" + cuestion_actual.idCuestion,
+    type: "PUT",
+    data: {
+      enunciadoDescripcion: nuevo_enunciado
+    },
+    // Fetch the stored token from localStorage and set in the header
+    headers: { Authorization: "Bearer " + localStorage.getItem("token") },
+    success: function(data, textStatus) {
+      if (nuevo_enunciado !== cuestion_actual.enunciadoDescripcion) {
+        alert("Cambiada!", textStatus);
+        window.localStorage.setItem(
+          "cuestion_actual",
+          JSON.stringify(data.cuestion)
+        );
+        $("#alertaCambioEnunciado").css("display", "flex");
+      }
+    },
+    error: function(XMLHttpRequest, textStatus, errorThrown) {
+      if (errorThrown == "Not Found") {
+        alert("error cabio enunciado");
+      }
     }
-    nuevas_cuestiones.push(cuestion);
-  }
-  return nuevas_cuestiones;
+  });
 }
 
 function cambio_estado() {
@@ -353,9 +346,7 @@ function cambio_estado() {
       enunciadoDisponible: !cuestion_actual.enunciadoDisponible
     },
     error: function(XMLHttpRequest, textStatus, errorThrown) {
-      if (errorThrown == "Not Found") {
-        alert("hubo un problema con la cuestion");
-      }
+      alert("NO funciono", errorThrown);
     },
     dataType: "json"
   });
