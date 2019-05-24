@@ -35,7 +35,9 @@ function cargar_soluciones(idCuestion) {
     },
     error: function(XMLHttpRequest, textStatus, errorThrown) {
       if (errorThrown == "Not Found") {
-        alert("No hay solucion");
+        $("#soluciones").html(
+          "<div class='card'><div class='card-body'><p class='card-text'>No hay soluciones disponibles</p></div></div><hr>"
+        );
       }
     },
     dataType: "json"
