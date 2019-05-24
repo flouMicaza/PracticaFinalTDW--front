@@ -22,7 +22,8 @@ function inicioLogin() {
         //errorThrown tira el error que devuelve la api
         //alert("fail " + errorThrown, +"gola");
         var mi_div = document.createElement("div");
-        mi_div.innerHTML = "<small>Credenciales incorrectas</small>";
+        mi_div.innerHTML =
+          "<small class='text-danger'>Credenciales incorrectas</small>";
         var form = document.getElementById("loginForm");
         form.insertBefore(mi_div, form.childNodes[5]);
       },
