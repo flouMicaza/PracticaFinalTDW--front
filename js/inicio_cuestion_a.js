@@ -7,7 +7,7 @@ function cargar_cuestion() {
   var div_enunciado = document.getElementById("header_enunciado");
   var boton_cerrar = document.getElementById("cerrar_cuestion");
   var nombre_cuestion = document.createElement("h3");
-  var texto = document.createTextNode(cuestion_actual.enunciado);
+  var texto = document.createTextNode(cuestion_actual.enunciadoDescripcion);
   nombre_cuestion.appendChild(texto);
   div_enunciado.insertBefore(nombre_cuestion, boton_cerrar);
   if (get_propuesta(aprendiz, cuestion_actual) != null) {
@@ -23,8 +23,8 @@ function enviar_propuesta() {
     window.localStorage.getItem("cuestion_actual")
   );
   datos.propuestas_sol[aprendiz.nombre].push({
-    clave_aprendiz: aprendiz.clave,
-    clave_cuestion_asociada: cuestion_actual.clave,
+    clave_aprendiz: aprendiz.id,
+    clave_cuestion_asociada: cuestion_actual.idCuestion,
     propuesta: solucion_alumno,
     correcta: null,
     error: ""
@@ -47,7 +47,7 @@ function get_propuesta(aprendiz, cuestion) {
   var propuestas = datos.propuestas_sol;
   var propuestas_aprendiz = propuestas[aprendiz.nombre];
   for (let propuesta of propuestas_aprendiz) {
-    if (propuesta.clave_cuestion_asociada == cuestion.clave) {
+    if (propuesta.clave_cuestion_asociada == cuestion.idCuestion) {
       return propuesta.propuesta;
     }
   }
@@ -110,7 +110,7 @@ function siguiente_solucion(ultima_sol_respondida, soluciones) {
   let index = 0;
   var proximo_indice = 0;
   for (let solucion of soluciones) {
-    if (solucion.clave == ultima_sol_respondida.clave_solucion) {
+    if (solucion.idSoluciones == ultima_sol_respondida.clave_solucion) {
       proximo_indice = index + 1;
       break;
     }
@@ -125,7 +125,7 @@ function crear_html_solucion(solucion) {
   var form_solucion = document.createElement("form");
   var div_row_form = document.createElement("div");
   div_row_form.className = "form-row";
-  div_row_form.id = "form_row" + solucion.clave;
+  div_row_form.id = "form_row" + solucion.idSoluciones;
 
   var div_col_label = document.createElement("div");
   div_col_label.className = "col-auto";
@@ -151,7 +151,7 @@ function crear_html_solucion(solucion) {
   div_col_check.appendChild(texto_correcto);
   var input_checkbox = document.createElement("input");
   input_checkbox.type = "checkbox";
-  input_checkbox.id = "input_correcta_" + solucion.clave;
+  input_checkbox.id = "input_correcta_" + solucion.idSoluciones;
   div_col_check.appendChild(input_checkbox);
 
   div_row_form.appendChild(div_col_check);
@@ -162,7 +162,7 @@ function crear_html_solucion(solucion) {
   button_corregir.className = "btn btn-primary btn-sm";
   button_corregir.onclick = corregir_solucion;
   button_corregir.value = "Corregir";
-  button_corregir.id = "solucion_" + solucion.clave;
+  button_corregir.id = "solucion_" + solucion.idSoluciones;
 
   div_col_button.appendChild(button_corregir);
   div_row_form.appendChild(div_col_button);
@@ -181,7 +181,7 @@ function corregir_solucion() {
   var soluciones = cuestion_actual.soluciones;
   var respuesta_correcta = "";
   for (let solucion of soluciones) {
-    if (solucion.clave == sol_id) {
+    if (solucion.idSoluciones == sol_id) {
       if (solucion.correcta == checkbox_val) {
         respuesta_correcta = true;
       } else {

@@ -151,9 +151,12 @@ function agregar_cuestion() {
     },
     data: data,
     success: function(data, textStatus) {
-      alert("Se creó la cuestion");
-
-      location.href = "inicio.html";
+      console.log(data);
+      window.localStorage.setItem(
+        "cuestion_actual",
+        JSON.stringify(data.cuestion)
+      );
+      location.href = "pagina_cuestion_profesor.html";
     },
     error: function(XMLHttpRequest, textStatus, errorThrown) {
       alert("Fail!", errorThrown);

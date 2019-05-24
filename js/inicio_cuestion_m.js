@@ -177,8 +177,6 @@ function agregar_solucion() {
       },
       data: data,
       success: function(data, textStatus) {
-        alert("Se creó la solucion");
-
         location.href = "pagina_cuestion_profesor.html";
       },
       error: function(XMLHttpRequest, textStatus, errorThrown) {
