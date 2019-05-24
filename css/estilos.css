@@ -22,3 +22,6 @@
 .delete-btn {
   float: right;
 }
+.btn {
+  margin-right: 5px;
+}
