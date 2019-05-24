@@ -74,13 +74,7 @@ function crear_html_solucion(solucion) {
   //botones
   var div_botones = crear_botones_solucion(solucion);
   div_form.appendChild(div_botones);
-  var div_small = document.createElement("div");
-  // div_small.innerHTML =
-  //   '<small id="mensaje_sol_vacia' +
-  //   solucion.idSoluciones +
-  //   '" class="text-danger" style="display:none"\
-  // >Solucion no puede ser vacía</small>';
-  // div_form.appendChild(div_small);
+
   sol_form.appendChild(div_form);
 
   return sol_form;
@@ -102,7 +96,7 @@ function crear_switch(solucion) {
   var input_switch = document.createElement("input");
   input_switch.type = "checkbox";
   input_switch.className = "custom-control-input";
-  input_switch.id = "switch_" + solucion.idsoluciones;
+  input_switch.id = "switch_" + solucion.idSoluciones;
   input_switch.checked = solucion.correcta;
   input_switch.onchange = cambio_estado_solucion;
   div_switch.appendChild(input_switch);
@@ -140,24 +134,21 @@ function crear_botones_solucion(solucion) {
   boton_editar.onclick = editar_solucion;
   div_botones.appendChild(boton_editar);
 
-  var el_a = document.createElement("a");
-  el_a.href = "../html/pagina_cuestion_profesor.html";
-
   var boton_eliminar = document.createElement("button");
   boton_eliminar.className = "btn btn-danger ";
   boton_eliminar.type = "button";
-  boton_eliminar.id = "eliminar_" + solucion.idsolciones;
+  console.log("solucion", solucion);
+  boton_eliminar.id = "eliminar_" + solucion.idSoluciones;
   var texto2 = document.createTextNode("Eliminar solución");
   boton_eliminar.appendChild(texto2);
   boton_eliminar.onclick = eliminar_solucion;
-  el_a.appendChild(boton_eliminar);
-  div_botones.appendChild(el_a);
+
+  div_botones.appendChild(boton_eliminar);
   var div_small = document.createElement("div");
   div_small.innerHTML =
     '<small id="mensaje_sol_vacia' +
     solucion.idSoluciones +
-    '" class="text-danger" style="display:none"\
-  >Solucion no puede ser vacía</small>';
+    '" class="text-danger" style="display:none">Solucion no puede ser vacía</small>';
   div_botones.appendChild(div_small);
   return div_botones;
 }
@@ -174,7 +165,7 @@ function agregar_solucion() {
   } else {
     var data = {
       descripcion: descripcion,
-      correcta: false,
+      correcta: 0,
       cuestionesIdcuestion: cuestion_actual.idCuestion
     };
     $.ajax({
@@ -200,35 +191,28 @@ function agregar_solucion() {
 }
 function eliminar_solucion() {
   var id_sol = this.id[9] + this.id[10];
-  var datos = JSON.parse(window.localStorage.getItem("datos"));
-  var cuestiones = datos.cuestiones;
-  var cuestion_actual = JSON.parse(
-    window.localStorage.getItem("cuestion_actual")
-  );
-
-  var nuevas_cuestiones = [];
-  for (let cuestion of cuestiones) {
-    if (cuestion.clave == cuestion_actual.clave) {
-      var soluciones_new = [];
-      for (let solucion of cuestion.soluciones) {
-        if (solucion.clave != id_sol) {
-          soluciones_new.push(solucion);
-        }
-      }
-      cuestion.soluciones = soluciones_new;
-      window.localStorage.setItem("cuestion_actual", JSON.stringify(cuestion));
-    }
-    nuevas_cuestiones.push(cuestion);
-  }
-
-  datos.cuestiones = nuevas_cuestiones;
-  window.localStorage.setItem("datos", JSON.stringify(datos));
+  console.log(this);
+  $.ajax({
+    url: "http://127.0.0.1:8000/api/v1/solutions/" + id_sol,
+    type: "DELETE",
+    // Fetch the stored token from localStorage and set in the header
+    headers: {
+      Authorization: "Bearer " + localStorage.getItem("token")
+    },
+    success: function(data, textStatus) {
+      location.href = "pagina_cuestion_profesor.html";
+    },
+    error: function(XMLHttpRequest, textStatus, errorThrown) {
+      alert("Fail eliminacion!", errorThrown);
+    },
+    dataType: "json"
+  });
 }
 
 //TODO: hacer esta funcion con el ajax
 function editar_solucion() {
   console.log("se edita");
-  var id_solucion = this["form"].id[5] + this["form"].id[6];
+  var id_solucion = this.form.id[5] + this.form.id[6];
 
   var enunciado_sol = $("#textarea_" + id_solucion).val();
   if (enunciado_sol == "") {
@@ -261,62 +245,27 @@ function editar_solucion() {
   return true;
 }
 
-function setear_nueva_solucion(
-  cuestiones,
-  cuestion_actual,
-  enunciado_sol,
-  id_solucion
-) {
-  var nuevas_cuestiones = [];
-  for (let cuestion of cuestiones) {
-    if (cuestion.clave == cuestion_actual.clave) {
-      for (let solucion of cuestion.soluciones) {
-        if (solucion.clave == id_solucion) {
-          solucion.descripcion = enunciado_sol;
-          window.localStorage.setItem(
-            "cuestion_actual",
-            JSON.stringify(cuestion)
-          );
-        }
+function cambio_estado_solucion() {
+  var id_solucion = this.id[7] + this.id[8];
+
+  var correcta = this.checked ? 1 : 0;
+  $.ajax({
+    url: "http://localhost:8000/api/v1/solutions/" + id_solucion,
+    type: "PUT",
+    data: {
+      correcta: correcta
+    },
+    // Fetch the stored token from localStorage and set in the header
+    headers: { Authorization: "Bearer " + localStorage.getItem("token") },
+
+    error: function(XMLHttpRequest, textStatus, errorThrown) {
+      if (errorThrown == "Not Found") {
+        alert("error cabio enunciado");
       }
     }
-    nuevas_cuestiones.push(cuestion);
-  }
-  return nuevas_cuestiones;
+  });
 }
 
-function cambio_estado_solucion() {
-  var cuestion_actual = JSON.parse(
-    window.localStorage.getItem("cuestion_actual")
-  );
-  var datos = JSON.parse(window.localStorage.getItem("datos"));
-  var id_sol = this.id[7] + this.id[8];
-  var nuevas_cuestiones = cambiar_estado_solucion(
-    datos.cuestiones,
-    cuestion_actual,
-    id_sol
-  );
-  datos.cuestiones = nuevas_cuestiones;
-  window.localStorage.setItem("datos", JSON.stringify(datos));
-}
-function cambiar_estado_solucion(cuestiones, cuestion_actual, id_sol) {
-  var nuevas_cuestiones = [];
-  for (let cuestion of cuestiones) {
-    if (cuestion.clave == cuestion_actual.clave) {
-      for (let solucion of cuestion.soluciones) {
-        if (solucion.clave == id_sol) {
-          solucion.correcta = !solucion.correcta;
-          window.localStorage.setItem(
-            "cuestion_actual",
-            JSON.stringify(cuestion)
-          );
-        }
-      }
-    }
-    nuevas_cuestiones.push(cuestion);
-  }
-  return nuevas_cuestiones;
-}
 //funcion que toma el nuevo enunciado, comprueba que se haya modificado.
 //Si se modificó el enunciado, lo setea en los datos de la BD y en cuestion_actual.
 function cambio_enunciado() {
@@ -359,12 +308,14 @@ function cambio_estado() {
   var cuestion_actual = JSON.parse(
     window.localStorage.getItem("cuestion_actual")
   );
+
   var switch_activar = document.getElementById("activacion_cuestion");
+  var disp = switch_activar.checked ? 1 : 0;
   $.ajax({
     url: "http://localhost:8000/api/v1/questions/" + cuestion_actual.idCuestion,
     type: "PUT",
     data: {
-      enunciadoDisponible: switch_activar.checked
+      enunciadoDisponible: disp
     },
     // Fetch the stored token from localStorage and set in the header
     headers: { Authorization: "Bearer " + localStorage.getItem("token") },
