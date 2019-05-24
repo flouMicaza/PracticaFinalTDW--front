@@ -10,77 +10,97 @@ function cargar_cuestion() {
   var texto = document.createTextNode(cuestion_actual.enunciadoDescripcion);
   nombre_cuestion.appendChild(texto);
   div_enunciado.insertBefore(nombre_cuestion, boton_cerrar);
-  if (get_propuesta(aprendiz, cuestion_actual) != null) {
-    preparar_soluciones();
-  }
+
+  //TODO : si ya se respondió la propuesta entonces voy al siguiente paso.
+  $.ajax({
+    url: "/api/v1/propuestasolucion/" + aprendiz.user_id + "/" + cuestion_actual.idCuestion,
+    type: "GET",
+    // Fetch the stored token from localStorage and set in the header
+    headers: { Authorization: "Bearer " + localStorage.getItem("token") },
+    //si ya creo una solucion entonces la entrego 
+    success: function(data, textStatus) {
+      preparar_soluciones(data.propuestaSolucion);
+      
+    },
+    error: function(XMLHttpRequest, textStatus, errorThrown) {
+      if (errorThrown != "Not Found") {
+        //no encontró una respuesta, entonces no se pone nada
+  
+        alert("Algo pasó al importar la propuestaSolución");
+      }
+    },
+    dataType: "json"
+  });
+  
 }
 
+//Hacer post para crear una propuesta se guarde
 function enviar_propuesta() {
   var solucion_alumno = document.getElementById("propuesta_de_solucion").value;
-  var datos = JSON.parse(window.localStorage.getItem("datos"));
-  var aprendiz = JSON.parse(window.localStorage.getItem("usuarioRegistrado"));
-  var cuestion_actual = JSON.parse(
+ var cuestion_actual = JSON.parse(
     window.localStorage.getItem("cuestion_actual")
   );
-  datos.propuestas_sol[aprendiz.nombre].push({
-    clave_aprendiz: aprendiz.id,
-    clave_cuestion_asociada: cuestion_actual.idCuestion,
-    propuesta: solucion_alumno,
-    correcta: null,
-    error: ""
+  console.log(cuestion_actual.idCuestion, "cuestion actual");
+  var data = {
+    descripcion: solucion_alumno,
+    cuestionesIdcuestion: cuestion_actual.idCuestion
+  };
+  $.ajax({
+    url: "/api/v1/propuestasolucion",
+    type: "POST",
+    // Fetch the stored token from localStorage and set in the header
+    headers: {
+      Authorization: "Bearer " + localStorage.getItem("token")
+    },
+    data: data,
+    success: function(data, textStatus) {
+     
+      preparar_soluciones(data.propuestaSolucion);
+    },
+    error: function(XMLHttpRequest, textStatus, errorThrown) {
+      alert("Fail!", errorThrown);
+    },
+    dataType: "json"
   });
-  window.localStorage.setItem("datos", JSON.stringify(datos));
-  preparar_soluciones();
 }
 
 //cambiar el input por la propuesta
 //cambiar el boton por pendiente
 //llamar a agregar solucion
-function preparar_soluciones() {
-  crear_label_propuesta();
-  crear_label_espera_correccion();
-  cargar_solucion();
+function preparar_soluciones(propuesta) {
+  crear_label_propuesta(propuesta);
+  crear_label_espera_correccion(propuesta);
+  //cargar_solucion();
 }
 
-function get_propuesta(aprendiz, cuestion) {
-  var datos = JSON.parse(window.localStorage.getItem("datos"));
-  var propuestas = datos.propuestas_sol;
-  var propuestas_aprendiz = propuestas[aprendiz.nombre];
-  for (let propuesta of propuestas_aprendiz) {
-    if (propuesta.clave_cuestion_asociada == cuestion.idCuestion) {
-      return propuesta.propuesta;
-    }
-  }
-  return null;
-}
 
-function crear_label_propuesta() {
-  var cuestion_actual = JSON.parse(
-    window.localStorage.getItem("cuestion_actual")
-  );
-  var aprendiz = JSON.parse(window.localStorage.getItem("usuarioRegistrado"));
-  var propuesta_de_solucion = get_propuesta(aprendiz, cuestion_actual);
+
+function crear_label_propuesta(propuesta_de_solucion) {
   var div_texarea_propuesta = document.getElementById("text_propuesta");
   div_texarea_propuesta.removeChild(
     document.getElementById("propuesta_de_solucion")
   );
   var label_propuesta = document.createElement("p");
   label_propuesta.id = "label_propuesta";
-  var texto = document.createTextNode(propuesta_de_solucion);
+  div_texarea_propuesta.className = "col-7 texto-destacado";
+  var texto = document.createTextNode(propuesta_de_solucion.descripcion);
   label_propuesta.appendChild(texto);
   div_texarea_propuesta.appendChild(label_propuesta);
 }
 
-function crear_label_espera_correccion() {
+function crear_label_espera_correccion(propuesta) {
   var div_boton_enviar = document.getElementById("div_boton_enviar");
   div_boton_enviar.removeChild(document.getElementById("boton_enviar"));
-
-  var respuesta_maestro = document.createElement("small");
-  respuesta_maestro.className = "text-info";
-  respuesta_maestro.id = "label_respuesta_maestro";
-  var texto_respuesta = document.createTextNode("Pendiente de Corrección");
-  respuesta_maestro.appendChild(texto_respuesta);
-  div_boton_enviar.appendChild(respuesta_maestro);
+  var estado;
+  if(propuesta.correcta==null){
+    estado = "Pendiente de corrección";
+  }else if(propuesta.correcta==1){
+    estado = "Bien!";
+  }else{
+    estado = "Mal!";
+  }
+  div_boton_enviar.innerHTML = "<small id='label_respuesta_maestro' class='text-info'>"+estado+"</small>";
+  
 }
 
 //funcion para carga una nueva solucion suponiendo que las anteriores ya se muestran.
@@ -92,13 +112,14 @@ function cargar_solucion() {
 
   var nombre_aprendiz = aprendiz.nombre;
   var soluciones_aprendiz = cuestion_actual.respuestas_sol[nombre_aprendiz];
+  var solucion_a_mostrar;
   if (soluciones_aprendiz.length == 0) {
-    var solucion_a_mostrar = cuestion_actual.soluciones[0];
+    solucion_a_mostrar = cuestion_actual.soluciones[0];
   } else {
     var ultima_sol_respondida =
       soluciones_aprendiz[soluciones_aprendiz.length - 1];
 
-    var solucion_a_mostrar = siguiente_solucion(
+    solucion_a_mostrar = siguiente_solucion(
       ultima_sol_respondida,
       cuestion_actual.soluciones
     );
