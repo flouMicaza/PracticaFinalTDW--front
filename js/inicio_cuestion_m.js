@@ -16,7 +16,7 @@ function cargar_cuestion() {
 
 function cargar_soluciones(idCuestion) {
   $.ajax({
-    url: "http://localhost:8000/api/v1/solutions/" + idCuestion,
+    url: "/api/v1/solutions/" + idCuestion,
     type: "GET",
     // Fetch the stored token from localStorage and set in the header
     headers: { Authorization: "Bearer " + localStorage.getItem("token") },
@@ -169,7 +169,7 @@ function agregar_solucion() {
       cuestionesIdcuestion: cuestion_actual.idCuestion
     };
     $.ajax({
-      url: "http://127.0.0.1:8000/api/v1/solutions",
+      url: "/api/v1/solutions",
       type: "POST",
       // Fetch the stored token from localStorage and set in the header
       headers: {
@@ -191,7 +191,7 @@ function eliminar_solucion() {
   var id_sol = this.id[9] + this.id[10];
   console.log(this);
   $.ajax({
-    url: "http://127.0.0.1:8000/api/v1/solutions/" + id_sol,
+    url: "/api/v1/solutions/" + id_sol,
     type: "DELETE",
     // Fetch the stored token from localStorage and set in the header
     headers: {
@@ -220,7 +220,7 @@ function editar_solucion() {
   }
   console.log(enunciado_sol);
   $.ajax({
-    url: "http://localhost:8000/api/v1/solutions/" + id_solucion,
+    url: "/api/v1/solutions/" + id_solucion,
     type: "PUT",
     data: {
       descripcion: enunciado_sol
@@ -248,7 +248,7 @@ function cambio_estado_solucion() {
 
   var correcta = this.checked ? 1 : 0;
   $.ajax({
-    url: "http://localhost:8000/api/v1/solutions/" + id_solucion,
+    url: "/api/v1/solutions/" + id_solucion,
     type: "PUT",
     data: {
       correcta: correcta
@@ -274,7 +274,7 @@ function cambio_enunciado() {
   var nuevo_enunciado = window.document.getElementById("input_nombre").value;
 
   $.ajax({
-    url: "http://localhost:8000/api/v1/questions/" + cuestion_actual.idCuestion,
+    url: "/api/v1/questions/" + cuestion_actual.idCuestion,
     type: "PUT",
     data: {
       enunciadoDescripcion: nuevo_enunciado
@@ -301,7 +301,6 @@ function cambio_enunciado() {
   });
 }
 
-//TODO arreglar esta mierda que no hace el put
 function cambio_estado() {
   var cuestion_actual = JSON.parse(
     window.localStorage.getItem("cuestion_actual")
@@ -310,7 +309,7 @@ function cambio_estado() {
   var switch_activar = document.getElementById("activacion_cuestion");
   var disp = switch_activar.checked ? 1 : 0;
   $.ajax({
-    url: "http://localhost:8000/api/v1/questions/" + cuestion_actual.idCuestion,
+    url: "/api/v1/questions/" + cuestion_actual.idCuestion,
     type: "PUT",
     data: {
       enunciadoDisponible: disp

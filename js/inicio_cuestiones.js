@@ -2,7 +2,7 @@
 function get_cuestiones() {
   $(document).ready(function() {
     $.ajax({
-      url: "http://localhost:8000/api/v1/questions",
+      url: "/api/v1/questions",
       type: "GET",
       // Fetch the stored token from localStorage and set in the header
       headers: { Authorization: "Bearer " + localStorage.getItem("token") },
@@ -111,7 +111,7 @@ function eliminar_cuestion() {
   var id_cuestion = this.id.split("_")[1];
 
   $.ajax({
-    url: "http://127.0.0.1:8000/api/v1/questions/" + id_cuestion,
+    url: "/api/v1/questions/" + id_cuestion,
     type: "DELETE",
     // Fetch the stored token from localStorage and set in the header
     headers: {
@@ -143,7 +143,7 @@ function agregar_cuestion() {
     estado: "abierta"
   };
   $.ajax({
-    url: "http://127.0.0.1:8000/api/v1/questions",
+    url: "/api/v1/questions",
     type: "POST",
     // Fetch the stored token from localStorage and set in the header
     headers: {
