@@ -54,6 +54,14 @@
       >
         Se ha cambiado el enunciado!
       </div>
+      <div
+        class="alert alert-success alert-dismissible fade show"
+        style="display:none"
+        role="alert"
+        id="alertaCambioSolucion"
+      >
+        Se ha cambiado la solución!
+      </div>
       <form action="./pagina_cuestion_profesor.html">
         <div class="form-row">
           <div class="col-auto">
@@ -86,7 +94,7 @@
 
       <main id="soluciones"></main>
 
-      <form onsubmit="return agregar_solucion();">
+      <form>
         <div class="form-row">
           <div class="col-auto">
             <label>Nueva solución </label>
@@ -102,9 +110,19 @@
             ></textarea>
           </div>
           <div class="col-auto">
-            <button class="btn btn-primary" type="submit">
+            <button
+              class="btn btn-primary"
+              type="button"
+              onclick="return agregar_solucion();"
+            >
               Añadir solución
             </button>
+            <small
+              id="mensaje_sol_vacia"
+              class="text-danger"
+              style="display:none"
+              >Solucion no puede ser vacía</small
+            >
           </div>
         </div>
       </form>
