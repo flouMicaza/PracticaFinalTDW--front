@@ -129,6 +129,7 @@ function crear_botones_solucion(solucion) {
   var boton_editar = document.createElement("button");
   boton_editar.className = "btn btn-primary";
   boton_editar.type = "button";
+  boton_editar.id = "boton" + solucion.idSoluciones;
   var texto = document.createTextNode("Editar solución");
   boton_editar.appendChild(texto);
   boton_editar.onclick = editar_solucion;
@@ -188,8 +189,8 @@ function agregar_solucion() {
   return true;
 }
 function eliminar_solucion() {
-  var id_sol = this.id[9] + this.id[10];
-  console.log(this);
+  var id_sol = this.id[10] != undefined ? this.id[9] + this.id[10] : this.id[9];
+  console.log("eliminar", this.id);
   $.ajax({
     url: "/api/v1/solutions/" + id_sol,
     type: "DELETE",
@@ -209,16 +210,16 @@ function eliminar_solucion() {
 
 //TODO: hacer esta funcion con el ajax
 function editar_solucion() {
-  console.log("se edita");
-  var id_solucion = this.form.id[5] + this.form.id[6];
-
+  var id_solucion =
+    this.id[6] != undefined ? this.id[5] + this.id[6] : this.id[5];
+  console.log("se edita", this);
   var enunciado_sol = $("#textarea_" + id_solucion).val();
   if (enunciado_sol == "") {
     console.log("gola");
     $("#mensaje_sol_vacia" + id_solucion).css("display", "");
     return;
   }
-  console.log(enunciado_sol);
+
   $.ajax({
     url: "/api/v1/solutions/" + id_solucion,
     type: "PUT",
@@ -244,8 +245,10 @@ function editar_solucion() {
 }
 
 function cambio_estado_solucion() {
-  var id_solucion = this.id[7] + this.id[8];
+  var id_solucion =
+    this.id[8] != undefined ? this.id[7] + this.id[8] : this.id[7];
 
+  console.log(id_solucion, "cambio de estado");
   var correcta = this.checked ? 1 : 0;
   $.ajax({
     url: "/api/v1/solutions/" + id_solucion,
