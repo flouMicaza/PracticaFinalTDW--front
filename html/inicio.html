@@ -12,11 +12,7 @@
       integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
       crossorigin="anonymous"
     />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="../css/inicio-cuestiones.css"
-    />
+    <link rel="stylesheet" type="text/css" href="../css/estilos.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
     <script src="../js/inicio_cuestiones.js"></script>
   </head>
@@ -42,7 +38,7 @@
       </div>
     </nav>
 
-    <div class="container" id="container">
+    <div class="contenedor-cuestiones container" id="container">
       <!-- <span class="delete-btn">
         <a href="login.html" class="btn btn-dark btn-sm">Salir</a>
       </span> -->
@@ -52,21 +48,26 @@
         <div class="card-body">
           <form action="./pagina_cuestion_profesor.html" class="cuestion-input">
             <!-- el input tiene required para que obligue a poner algo en la cuestion-->
-            <input
-              id="id_nueva_cuestion"
-              type="text"
-              class="form-control "
-              placeholder="Nueva cuestión"
-              required
-            />
-
-            <button
-              class="btn btn-primary"
-              type="button"
-              onclick="agregar_cuestion();"
-            >
-              Agregar
-            </button>
+            <div class="form-row">
+              <div class="col-10">
+                <input
+                  id="id_nueva_cuestion"
+                  type="text"
+                  class="form-control "
+                  placeholder="Nueva cuestión"
+                  required
+                />
+              </div>
+              <div class="col-auto">
+                <button
+                  class="btn btn-primary"
+                  type="button"
+                  onclick="agregar_cuestion();"
+                >
+                  Agregar
+                </button>
+              </div>
+            </div>
           </form>
         </div>
       </div>

@@ -6,3 +6,19 @@
   padding: 5%;
   background-color: #e3f2fd;
 }
+
+.contenedor-cuestiones {
+  margin: 5% auto;
+}
+.contenedor-cuestion {
+  background-color: #e3f2fd;
+  margin-top: 10px;
+  padding-bottom: 10px;
+  padding-top: 10px;
+}
+.navbar {
+  background-color: #e3f2fd;
+}
+.delete-btn {
+  float: right;
+}
