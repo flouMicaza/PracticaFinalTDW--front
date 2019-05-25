@@ -24,17 +24,13 @@ function cargar_propuestas(idCuestion){
     headers: { Authorization: "Bearer " + localStorage.getItem("token") },
     //si ya creo una solucion entonces la entrego 
     success: function(data, textStatus) {
-      alert("preparó!!!")
       preparar_propuestas(data);
       
     },
     error: function(XMLHttpRequest, textStatus, errorThrown) {
       if (errorThrown == "Not Found") {
         //no encontró una respuesta, entonces no se pone nada
-        $("#propuesta_tipo").remove();
-
-        alert("No hay propuestas");
-        
+        $("#propuesta_tipo").remove();        
       }
     },
     dataType: "json"
@@ -73,11 +69,14 @@ function preparar_propuestas(propuestas){
   //$("#propuestas") es el main para las propuestas
   for (let propuesta of propuestas) {
     propuesta = propuesta.propuestaSolucion;
-    $("#propuestas").append($("#propuesta_tipo").clone());
-    $("#propuestas").children().last().attr("id","propuesta_" + propuesta.idPropuestaSolucion);
-    
-    $("#propuesta_" + propuesta.idPropuestaSolucion).find("p").text(propuesta.descripcion);
-    $("#propuesta_" + propuesta.idPropuestaSolucion).find("button").attr("id","boton_" + propuesta.idPropuestaSolucion)
+    if(propuesta.correcta==null && propuesta.error==null){
+      
+      $("#propuestas").append($("#propuesta_tipo").clone());
+      $("#propuestas").children().last().attr("id","propuesta_" + propuesta.idPropuestaSolucion);
+      
+      $("#propuesta_" + propuesta.idPropuestaSolucion).find("p").text(propuesta.descripcion);
+      $("#propuesta_" + propuesta.idPropuestaSolucion).find("button").attr("id","boton_" + propuesta.idPropuestaSolucion)
+    }
   }
   $("#propuesta_tipo").remove();
 }
@@ -178,7 +177,6 @@ function corregir_propuesta(elemento){
     // Fetch the stored token from localStorage and set in the header
     headers: { Authorization: "Bearer " + localStorage.getItem("token") },
     success: function(data, textStatus) {
-      alert("Enviado!", textStatus);
       quitar_propuesta(data.propuestaSolucion);
 
     },
@@ -301,7 +299,6 @@ function editar_solucion() {
     // Fetch the stored token from localStorage and set in the header
     headers: { Authorization: "Bearer " + localStorage.getItem("token") },
     success: function(data, textStatus) {
-      alert("Cambiada!", textStatus);
 
       $("#alertaCambioSolucion").css("display", "flex");
       $("#alertaCambioEnunciado").css("display", "none");
@@ -358,7 +355,6 @@ function cambio_enunciado() {
     headers: { Authorization: "Bearer " + localStorage.getItem("token") },
     success: function(data, textStatus) {
       if (nuevo_enunciado !== cuestion_actual.enunciadoDescripcion) {
-        alert("Cambiada!", textStatus);
         window.localStorage.setItem(
           "cuestion_actual",
           JSON.stringify(data.cuestion)
