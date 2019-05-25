@@ -14,6 +14,7 @@ function cargar_cuestion() {
   cargar_soluciones(cuestion_actual.idCuestion);
   cargar_propuestas(cuestion_actual.idCuestion);
 }
+
 function cargar_propuestas(idCuestion){
   //cargar las propuestas de solucion para esa cuestion
   $.ajax({
@@ -28,10 +29,12 @@ function cargar_propuestas(idCuestion){
       
     },
     error: function(XMLHttpRequest, textStatus, errorThrown) {
-      if (errorThrown != "Not Found") {
+      if (errorThrown == "Not Found") {
         //no encontró una respuesta, entonces no se pone nada
-  
+        $("#propuesta_tipo").remove();
+
         alert("No hay propuestas");
+        
       }
     },
     dataType: "json"
@@ -73,8 +76,8 @@ function preparar_propuestas(propuestas){
     $("#propuestas").append($("#propuesta_tipo").clone());
     $("#propuestas").children().last().attr("id","propuesta_" + propuesta.idPropuestaSolucion);
     
-    var p_enunciado_propuesta = $("#propuesta_" + propuesta.idPropuestaSolucion).find("p").text(propuesta.descripcion);
-
+    $("#propuesta_" + propuesta.idPropuestaSolucion).find("p").text(propuesta.descripcion);
+    $("#propuesta_" + propuesta.idPropuestaSolucion).find("button").attr("id","boton_" + propuesta.idPropuestaSolucion)
   }
   $("#propuesta_tipo").remove();
 }
@@ -158,8 +161,38 @@ function crear_input_solucion(solucion) {
 }
 //metodo para hacer put del error y de si es correcta,
 //eliminar la propuesta si ya está corregida
-function corregir_propuesta(){
-  console.log(this,"thiiis");
+function corregir_propuesta(elemento){
+  var id_propuesta = elemento.id.split("_").pop();
+  var error = $("#propuesta_" + id_propuesta).find("textarea").val();
+  var correcta = $("#propuesta_" + id_propuesta).find("input").is(':checked');
+  var cuestion_actual = JSON.parse(
+    window.localStorage.getItem("cuestion_actual")
+  );
+  $.ajax({
+    url: "/api/v1/propuestasolucion/" + id_propuesta,
+    type: "PUT",
+    data: {
+      error: error,
+      correcta : correcta ? 1 : 0
+    },
+    // Fetch the stored token from localStorage and set in the header
+    headers: { Authorization: "Bearer " + localStorage.getItem("token") },
+    success: function(data, textStatus) {
+      alert("Enviado!", textStatus);
+      quitar_propuesta(data.propuestaSolucion);
+
+    },
+    error: function(XMLHttpRequest, textStatus, errorThrown) {
+      if (errorThrown == "Not Found") {
+        alert("error cabio enunciado");
+      }
+    }
+  });
+  console.log(elemento.id.split("_").pop(),"thiiis");
+}
+
+function quitar_propuesta(propuesta){
+  $("#propuesta_" + propuesta.idPropuestaSolucion).remove();
 }
 function crear_botones_solucion(solucion) {
   var div_botones = document.createElement("div");
