@@ -12,8 +12,31 @@ function cargar_cuestion() {
   switch_activar.onchange = cambio_estado;
 
   cargar_soluciones(cuestion_actual.idCuestion);
+  cargar_propuestas(cuestion_actual.idCuestion);
 }
-
+function cargar_propuestas(idCuestion){
+  //cargar las propuestas de solucion para esa cuestion
+  $.ajax({
+    url: "/api/v1/propuestasolucion/" + idCuestion,
+    type: "GET",
+    // Fetch the stored token from localStorage and set in the header
+    headers: { Authorization: "Bearer " + localStorage.getItem("token") },
+    //si ya creo una solucion entonces la entrego 
+    success: function(data, textStatus) {
+      alert("preparó!!!")
+      preparar_propuestas(data);
+      
+    },
+    error: function(XMLHttpRequest, textStatus, errorThrown) {
+      if (errorThrown != "Not Found") {
+        //no encontró una respuesta, entonces no se pone nada
+  
+        alert("No hay propuestas");
+      }
+    },
+    dataType: "json"
+  });
+}
 function cargar_soluciones(idCuestion) {
   $.ajax({
     url: "/api/v1/solutions/" + idCuestion,
@@ -29,7 +52,7 @@ function cargar_soluciones(idCuestion) {
         var soluciones_main = document.getElementById("soluciones");
         var card_solucion = crear_html_solucion(solucion);
         soluciones_main.appendChild(card_solucion);
-        var mi_hr = document.createElement("hr");
+        var mi_hr = document.createElement("br");
         soluciones_main.appendChild(mi_hr);
       }
     },
@@ -42,6 +65,18 @@ function cargar_soluciones(idCuestion) {
     },
     dataType: "json"
   });
+}
+function preparar_propuestas(propuestas){
+  //$("#propuestas") es el main para las propuestas
+  for (let propuesta of propuestas) {
+    propuesta = propuesta.propuestaSolucion;
+    $("#propuestas").append($("#propuesta_tipo").clone());
+    $("#propuestas").children().last().attr("id","propuesta_" + propuesta.idPropuestaSolucion);
+    
+    var p_enunciado_propuesta = $("#propuesta_" + propuesta.idPropuestaSolucion).find("p").text(propuesta.descripcion);
+
+  }
+  $("#propuesta_tipo").remove();
 }
 function crear_html_solucion(solucion) {
   //form
@@ -121,7 +156,11 @@ function crear_input_solucion(solucion) {
   div_sol.appendChild(input_sol);
   return div_sol;
 }
-
+//metodo para hacer put del error y de si es correcta,
+//eliminar la propuesta si ya está corregida
+function corregir_propuesta(){
+  console.log(this,"thiiis");
+}
 function crear_botones_solucion(solucion) {
   var div_botones = document.createElement("div");
   div_botones.className = "col-auto";

@@ -11,7 +11,7 @@ function cargar_cuestion() {
   nombre_cuestion.appendChild(texto);
   div_enunciado.insertBefore(nombre_cuestion, boton_cerrar);
 
-  //TODO : si ya se respondió la propuesta entonces voy al siguiente paso.
+  //cargar las soluciones de esa cuestion
   $.ajax({
     url: "/api/v1/propuestasolucion/" + aprendiz.user_id + "/" + cuestion_actual.idCuestion,
     type: "GET",
@@ -31,6 +31,7 @@ function cargar_cuestion() {
     },
     dataType: "json"
   });
+
   
 }
 

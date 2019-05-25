@@ -97,7 +97,36 @@
       <hr />
 
       <main id="soluciones"></main>
-
+      <hr/>
+      <main id="propuestas" >
+        <div id="propuesta_tipo">
+        <div class="row">
+          <div class="col-2">
+            <label>Propuesta de solución</label>
+          </div>
+          <div class="col">
+            <p class="texto-destacado">El software es algo bien bueno</p>
+          </div>
+        </div>
+        <form>
+        <div class="form-row">
+          <div class="col-1">
+            <label>Error: </label>
+          </div>
+          <div class="col-7">
+            <textarea class="form-control" placeholder="Entregar feedback al aprendiz" cols="60"></textarea>
+          </div>
+          <div class="col-4">
+              <input type="checkbox" id="correcta">Correcta
+              <button type="button" class="btn btn-primary" onclick="corregir_propuesta();">Corregir propuesta</button>
+          </div>
+        </div>
+      </form>
+      <br>
+    </div>
+        </main>
+      
+      <hr/>
       <form>
         <div class="form-row">
           <div class="col-auto">
