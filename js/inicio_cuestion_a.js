@@ -31,8 +31,6 @@ function cargar_cuestion() {
     },
     dataType: "json"
   });
-
-  
 }
 
 //Hacer post para crear una propuesta se guarde
@@ -41,7 +39,6 @@ function enviar_propuesta() {
  var cuestion_actual = JSON.parse(
     window.localStorage.getItem("cuestion_actual")
   );
-  console.log(cuestion_actual.idCuestion, "cuestion actual");
   var data = {
     descripcion: solucion_alumno,
     cuestionesIdcuestion: cuestion_actual.idCuestion
@@ -119,61 +116,97 @@ $.ajax({
   headers: { Authorization: "Bearer " + localStorage.getItem("token") },
   //si ya creo una solucion entonces la entrego 
   success: function(respondidas, textStatus) {
-    alert("soluciones respondidas!");
     $.ajax({
       url: "/api/v1/solutions/" + cuestion_actual.idCuestion,
       type: "GET",
       // Fetch the stored token from localStorage and set in the header
       headers: { Authorization: "Bearer " + localStorage.getItem("token") },
       success: function(soluciones, textStatus) {
-        alert("se importan las soluciones");
-        seleccionarSolucion(soluciones,respondidas)
+        seleccionarSolucion(soluciones,respondidas);
         //crear_html_solucion(soluciones,respondidas)
       },
       error: function(XMLHttpRequest, textStatus, errorThrown) {
-        alert("hubo un error importando soluciones")
+        alert("hubo un error importando soluciones");
       },
       dataType: "json"
     });
     
   },
   error: function(XMLHttpRequest, textStatus, errorThrown) {
-    if (errorThrown != "Not Found") {
-      //no encontró una respuesta, entonces no se pone nada
-
-      alert("Algo pasó al importar la respuestaSolución");
+    if (errorThrown == "Not Found") {
+      //busco las soluciones
+      $.ajax({
+        url: "/api/v1/solutions/" + cuestion_actual.idCuestion,
+        type: "GET",
+        // Fetch the stored token from localStorage and set in the header
+        headers: { Authorization: "Bearer " + localStorage.getItem("token") },
+        success: function(soluciones, textStatus) {
+          console.log(soluciones.soluciones[0],"soluciones");
+          crear_html_solucion(soluciones.soluciones[0]);
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown) {
+          alert("hubo un error importando soluciones");
+        },
+        dataType: "json"
+      });
     }
   },
   dataType: "json"
 });
 
 }
-function seleccionarSolucion(soluciones,respondidas){
-  var soluciones = soluciones.soluciones;
-  
-  //console.log(soluciones);
-  //mostrar las soluciones que ya se respondieron con la respuesta que ya respondió. 
-  // mostrar una nueva solucion que no ha sido repsondida, 
-  //en la funcion del boton de corregir se tiene que revisar y denuevo cargar las solucinoes que han sido responiddias. 
+/**
+ * Método que crea los elementos de las soluciones que ya han sido respondidas. 
+ * @param  soluciones 
+ * @param  responiddias 
+ */
+function mostrar_respuestas(soluciones,respondidas){
   for (let respondida of respondidas.respuestaSolucion) {
     respondida = respondida.respuestaSolucion;
-    console.log(respondida,"respondida");
     //soluciones que ya fueron respondidas. 
     var solucion = soluciones.filter(sol=>
       sol.soluciones.idSoluciones==respondida.solucionesIdsoluciones
-
     );
-    console.log(solucion);
-    if(solucion.length!=0) crear_html_solucion_respondida(solucion[0].soluciones,respondida);
+    if(solucion.length!=0) crear_html_solucion_respondida(solucion[0].soluciones,respondida.respuesta);
   }
 }
+/**
+ * Método para mostrar soluciones ya respondidas y mostrar una nueva solución para responder.
+ * @param soluciones 
+ * @param respondidas 
+ */
+function seleccionarSolucion(soluciones,respondidas){
+  soluciones = soluciones.soluciones;
+  
+  // mostrar una nueva solucion que no ha sido repsondida, 
+  //en la funcion del boton de corregir se tiene que revisar y denuevo cargar las solucinoes que han sido responiddias. 
+  mostrar_respuestas(soluciones,respondidas);
+  mostrar_solucion_nueva(soluciones,respondidas.respuestaSolucion);
 
+
+}
+/**
+ * Método que busca una solucion que no haya sido respondida. 
+ */
+function mostrar_solucion_nueva(soluciones,respondidas){
+  
+  for(let solucion of soluciones ){
+    var id = solucion.soluciones.idSoluciones;
+    var sol = respondidas.find(function(elemento){
+      return elemento.respuestaSolucion.solucionesIdsoluciones == id;
+    });
+    if(sol==undefined){
+      crear_html_solucion(solucion);
+      return;
+    }
+  }
+}
 /**
  * Método que crea los elementos para una solucion que ya fue respondida.  
  * @param  solucion 
  * @param respondida 
  */
-function crear_html_solucion_respondida(solucion,respondida){
+function crear_html_solucion_respondida(solucion,respondida_respuesta){
   var main_soluciones = document.getElementById("soluciones_main");
 
   var form_solucion = document.createElement("form");
@@ -206,7 +239,7 @@ function crear_html_solucion_respondida(solucion,respondida){
   var input_checkbox = document.createElement("input");
   input_checkbox.type = "checkbox";
   input_checkbox.id = "input_correcta_" + solucion.idSoluciones;
-  input_checkbox.checked = respondida.respuesta;
+  input_checkbox.checked = respondida_respuesta;
   input_checkbox.disabled = true;
   div_col_check.appendChild(input_checkbox);
 
@@ -217,7 +250,7 @@ function crear_html_solucion_respondida(solucion,respondida){
   var correccion = document.createElement("small");
   correccion.className = "text-info";
   correccion.id = "label_correccion";
-  var texto_respuesta = respondida.respuesta==solucion.correcta
+  texto_respuesta = respondida_respuesta==solucion.correcta
   ? document.createTextNode("Bien!")
   : document.createTextNode("Mal!");
   correccion.appendChild(texto_respuesta);
@@ -234,8 +267,10 @@ function crear_html_solucion_respondida(solucion,respondida){
  * @param  solucion 
  * @param  respondidas 
  */
-function crear_html_solucion(solucion,respondidas) {
-  var solucion = solucion.soluciones[0].soluciones;
+function crear_html_solucion(solucion) {
+  solucion = solucion.soluciones;
+
+  console.log("sssssoolcuion", solucion);
   var main_soluciones = document.getElementById("soluciones_main");
 
   var form_solucion = document.createElement("form");
@@ -276,7 +311,6 @@ function crear_html_solucion(solucion,respondidas) {
   var button_corregir = document.createElement("input");
   button_corregir.type = "button";
   button_corregir.className = "btn btn-primary btn-sm";
-  button_corregir.onclick = corregir_solucion;
   button_corregir.value = "Corregir";
   button_corregir.id = "solucion_" + solucion.idSoluciones;
 
@@ -284,39 +318,42 @@ function crear_html_solucion(solucion,respondidas) {
   div_row_form.appendChild(div_col_button);
   form_solucion.appendChild(div_row_form);
   main_soluciones.appendChild(form_solucion);
+  $("#solucion_" + solucion.idSoluciones).click(function(){
+    corregir_solucion(solucion);
+  });
 }
 
 /**
- * Método que crea el elemento small que indica si una respuesta es correcta o no o si no ha sido corregida aun. 
+ * Método que crea el elemento small que indica si una respuesta es correcta o no.
+ *  
  */
-function corregir_solucion() {
-  var sol_id = this.id[9] + this.id[10];
+function corregir_solucion(solucion) {
+  var sol_id = solucion.idSoluciones;
+  var aprendiz = JSON.parse(window.localStorage.getItem("usuarioRegistrado"));
+ 
   var checkbox_val = document.getElementById("input_correcta_" + sol_id)
     .checked;
-  var cuestion_actual = JSON.parse(
-    window.localStorage.getItem("cuestion_actual")
-  );
+    var data = {
+      respuesta : checkbox_val ? 1 : 0,
+      solucionesIdsoluciones : sol_id,
+      usuariosId : aprendiz.user_id
+    };
+    $.ajax({
+      url: "/api/v1/respuestasolucion",
+      type: "POST",
+      // Fetch the stored token from localStorage and set in the header
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("token")
+      },
+      data: data,
+      success: function(data, textStatus) {
+        //crear_html_solucion_respondida(solucion,checkbox_val);
+        location.href = "pagina_cuestion_alumno.html";
+      },
+      error: function(XMLHttpRequest, textStatus, errorThrown) {
+        alert("Fail!", errorThrown);
+      },
+      dataType: "json"
+    });
 
-  var soluciones = cuestion_actual.soluciones;
-  var respuesta_correcta = "";
-  for (let solucion of soluciones) {
-    if (solucion.idSoluciones == sol_id) {
-      if (solucion.correcta == checkbox_val) {
-        respuesta_correcta = true;
-      } else {
-        respuesta_correcta = false;
-      }
-      break;
-    }
-  }
-  var respuesta_solucion = document.createElement("small");
-  respuesta_solucion.className = "text-info";
-  respuesta_solucion.id = "label_respuesta_solucion";
-  var texto_respuesta = respuesta_correcta
-    ? document.createTextNode("Bien!")
-    : document.createTextNode("Mal!");
-  respuesta_solucion.appendChild(texto_respuesta);
-
-  var div_sol = document.getElementById("form_row" + sol_id);
-  div_sol.appendChild(respuesta_solucion);
 }

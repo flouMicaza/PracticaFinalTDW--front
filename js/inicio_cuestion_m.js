@@ -75,7 +75,7 @@ function preparar_propuestas(propuestas){
       $("#propuestas").children().last().attr("id","propuesta_" + propuesta.idPropuestaSolucion);
       
       $("#propuesta_" + propuesta.idPropuestaSolucion).find("p").text(propuesta.descripcion);
-      $("#propuesta_" + propuesta.idPropuestaSolucion).find("button").attr("id","boton_" + propuesta.idPropuestaSolucion)
+      $("#propuesta_" + propuesta.idPropuestaSolucion).find("button").attr("id","boton_" + propuesta.idPropuestaSolucion);
     }
   }
   $("#propuesta_tipo").remove();
@@ -164,9 +164,7 @@ function corregir_propuesta(elemento){
   var id_propuesta = elemento.id.split("_").pop();
   var error = $("#propuesta_" + id_propuesta).find("textarea").val();
   var correcta = $("#propuesta_" + id_propuesta).find("input").is(':checked');
-  var cuestion_actual = JSON.parse(
-    window.localStorage.getItem("cuestion_actual")
-  );
+
   $.ajax({
     url: "/api/v1/propuestasolucion/" + id_propuesta,
     type: "PUT",
