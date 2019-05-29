@@ -71,7 +71,7 @@ function enviar_propuesta() {
 function preparar_soluciones(propuesta) {
   crear_label_propuesta(propuesta);
   crear_label_espera_correccion(propuesta);
-  //cargar_solucion();
+  cargar_solucion();
 }
 
 
@@ -98,7 +98,7 @@ function crear_label_espera_correccion(propuesta) {
   }else if(propuesta.correcta==1){
     estado = "Bien!";
   }else{
-    estado = "Mal!";
+    estado = "Mal!" + propuesta.error;
   }
   div_boton_enviar.innerHTML = "<small id='label_respuesta_maestro' class='text-info'>"+estado+"</small>";
   
@@ -110,22 +110,45 @@ function cargar_solucion() {
   var cuestion_actual = JSON.parse(
     window.localStorage.getItem("cuestion_actual")
   );
+ //cargar las soluciones de esa cuestion
+ //Lista de respuestaSolucion: {blabla}
+ $.ajax({
+  url: "/api/v1/respuestasolucion/" + aprendiz.user_id,
+  type: "GET",
+  // Fetch the stored token from localStorage and set in the header
+  headers: { Authorization: "Bearer " + localStorage.getItem("token") },
+  //si ya creo una solucion entonces la entrego 
+  success: function(data, textStatus) {
+    alert("solucinoes respondidas!");
+    console.log(data);
+    
+  },
+  error: function(XMLHttpRequest, textStatus, errorThrown) {
+    if (errorThrown != "Not Found") {
+      //no encontró una respuesta, entonces no se pone nada
 
-  var nombre_aprendiz = aprendiz.nombre;
-  var soluciones_aprendiz = cuestion_actual.respuestas_sol[nombre_aprendiz];
-  var solucion_a_mostrar;
-  if (soluciones_aprendiz.length == 0) {
-    solucion_a_mostrar = cuestion_actual.soluciones[0];
-  } else {
-    var ultima_sol_respondida =
-      soluciones_aprendiz[soluciones_aprendiz.length - 1];
+      alert("Algo pasó al importar la respuestaSolución");
+    }
+  },
+  dataType: "json"
+});
 
-    solucion_a_mostrar = siguiente_solucion(
-      ultima_sol_respondida,
-      cuestion_actual.soluciones
-    );
-  }
-  crear_html_solucion(solucion_a_mostrar);
+$.ajax({
+  url: "/api/v1/solutions/" + cuestion_actual.idCuestion,
+  type: "GET",
+  // Fetch the stored token from localStorage and set in the header
+  headers: { Authorization: "Bearer " + localStorage.getItem("token") },
+  success: function(data, textStatus) {
+    alert("se importan las soluciones");
+    console.log(data);
+  },
+  error: function(XMLHttpRequest, textStatus, errorThrown) {
+    alert("hubo un error importando soluciones")
+  },
+  dataType: "json"
+});
+
+  //crear_html_solucion(solucion_a_mostrar);
 }
 
 function siguiente_solucion(ultima_sol_respondida, soluciones) {
