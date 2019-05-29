@@ -126,7 +126,10 @@ $.ajax({
         //crear_html_solucion(soluciones,respondidas)
       },
       error: function(XMLHttpRequest, textStatus, errorThrown) {
-        alert("hubo un error importando soluciones");
+        if(errorThrown!="Not Found"){
+
+          alert("hubo un error importando soluciones");
+        }
       },
       dataType: "json"
     });
