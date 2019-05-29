@@ -110,17 +110,31 @@ function cargar_solucion() {
   var cuestion_actual = JSON.parse(
     window.localStorage.getItem("cuestion_actual")
   );
- //cargar las soluciones de esa cuestion
+
  //Lista de respuestaSolucion: {blabla}
- $.ajax({
+$.ajax({
   url: "/api/v1/respuestasolucion/" + aprendiz.user_id,
   type: "GET",
   // Fetch the stored token from localStorage and set in the header
   headers: { Authorization: "Bearer " + localStorage.getItem("token") },
   //si ya creo una solucion entonces la entrego 
-  success: function(data, textStatus) {
-    alert("solucinoes respondidas!");
-    console.log(data);
+  success: function(respondidas, textStatus) {
+    alert("soluciones respondidas!");
+    $.ajax({
+      url: "/api/v1/solutions/" + cuestion_actual.idCuestion,
+      type: "GET",
+      // Fetch the stored token from localStorage and set in the header
+      headers: { Authorization: "Bearer " + localStorage.getItem("token") },
+      success: function(soluciones, textStatus) {
+        alert("se importan las soluciones");
+        seleccionarSolucion(soluciones,respondidas)
+        //crear_html_solucion(soluciones,respondidas)
+      },
+      error: function(XMLHttpRequest, textStatus, errorThrown) {
+        alert("hubo un error importando soluciones")
+      },
+      dataType: "json"
+    });
     
   },
   error: function(XMLHttpRequest, textStatus, errorThrown) {
@@ -133,38 +147,33 @@ function cargar_solucion() {
   dataType: "json"
 });
 
-$.ajax({
-  url: "/api/v1/solutions/" + cuestion_actual.idCuestion,
-  type: "GET",
-  // Fetch the stored token from localStorage and set in the header
-  headers: { Authorization: "Bearer " + localStorage.getItem("token") },
-  success: function(data, textStatus) {
-    alert("se importan las soluciones");
-    console.log(data);
-  },
-  error: function(XMLHttpRequest, textStatus, errorThrown) {
-    alert("hubo un error importando soluciones")
-  },
-  dataType: "json"
-});
-
-  //crear_html_solucion(solucion_a_mostrar);
 }
+function seleccionarSolucion(soluciones,respondidas){
+  var soluciones = soluciones.soluciones;
+  
+  //console.log(soluciones);
+  //mostrar las soluciones que ya se respondieron con la respuesta que ya respondió. 
+  // mostrar una nueva solucion que no ha sido repsondida, 
+  //en la funcion del boton de corregir se tiene que revisar y denuevo cargar las solucinoes que han sido responiddias. 
+  for (let respondida of respondidas.respuestaSolucion) {
+    respondida = respondida.respuestaSolucion;
+    console.log(respondida,"respondida");
+    //soluciones que ya fueron respondidas. 
+    var solucion = soluciones.filter(sol=>
+      sol.soluciones.idSoluciones==respondida.solucionesIdsoluciones
 
-function siguiente_solucion(ultima_sol_respondida, soluciones) {
-  let index = 0;
-  var proximo_indice = 0;
-  for (let solucion of soluciones) {
-    if (solucion.idSoluciones == ultima_sol_respondida.clave_solucion) {
-      proximo_indice = index + 1;
-      break;
-    }
-    index++;
+    );
+    console.log(solucion);
+    if(solucion.length!=0) crear_html_solucion_respondida(solucion[0].soluciones,respondida);
   }
-  return soluciones[proximo_indice];
 }
 
-function crear_html_solucion(solucion) {
+/**
+ * Método que crea los elementos para una solucion que ya fue respondida.  
+ * @param  solucion 
+ * @param respondida 
+ */
+function crear_html_solucion_respondida(solucion,respondida){
   var main_soluciones = document.getElementById("soluciones_main");
 
   var form_solucion = document.createElement("form");
@@ -176,7 +185,69 @@ function crear_html_solucion(solucion) {
   div_col_label.className = "col-auto";
 
   var label_sol = document.createElement("label");
-  var texto_respuesta = document.createTextNode("Solución");
+  var texto_respuesta = document.createTextNode("Solución: ");
+  label_sol.appendChild(texto_respuesta);
+
+  div_col_label.appendChild(label_sol);
+  div_row_form.appendChild(div_col_label);
+
+  var div_col_p = document.createElement("div");
+  div_col_p.className = "col-7";
+  var p_sol = document.createElement("p");
+  var texto_solucion = document.createTextNode(solucion.descripcion);
+  p_sol.appendChild(texto_solucion);
+  div_col_p.appendChild(p_sol);
+  div_row_form.appendChild(div_col_p);
+
+  var div_col_check = document.createElement("div");
+  div_col_check.className = "col-auto";
+  var texto_correcto = document.createTextNode("Correcta:");
+  div_col_check.appendChild(texto_correcto);
+  var input_checkbox = document.createElement("input");
+  input_checkbox.type = "checkbox";
+  input_checkbox.id = "input_correcta_" + solucion.idSoluciones;
+  input_checkbox.checked = respondida.respuesta;
+  input_checkbox.disabled = true;
+  div_col_check.appendChild(input_checkbox);
+
+
+  div_row_form.appendChild(div_col_check);
+  var div_col_button = document.createElement("div");
+  div_col_button.className = "col-auto";
+  var correccion = document.createElement("small");
+  correccion.className = "text-info";
+  correccion.id = "label_correccion";
+  var texto_respuesta = respondida.respuesta==solucion.correcta
+  ? document.createTextNode("Bien!")
+  : document.createTextNode("Mal!");
+  correccion.appendChild(texto_respuesta);
+
+
+  div_col_button.appendChild(correccion);
+  div_row_form.appendChild(div_col_button);
+  form_solucion.appendChild(div_row_form);
+  main_soluciones.appendChild(form_solucion);
+}
+
+/**
+ * Método que crea los elementos para una solución a responder.
+ * @param  solucion 
+ * @param  respondidas 
+ */
+function crear_html_solucion(solucion,respondidas) {
+  var solucion = solucion.soluciones[0].soluciones;
+  var main_soluciones = document.getElementById("soluciones_main");
+
+  var form_solucion = document.createElement("form");
+  var div_row_form = document.createElement("div");
+  div_row_form.className = "form-row";
+  div_row_form.id = "form_row" + solucion.idSoluciones;
+
+  var div_col_label = document.createElement("div");
+  div_col_label.className = "col-auto";
+
+  var label_sol = document.createElement("label");
+  var texto_respuesta = document.createTextNode("Solución: ");
   label_sol.appendChild(texto_respuesta);
 
   div_col_label.appendChild(label_sol);
@@ -215,6 +286,9 @@ function crear_html_solucion(solucion) {
   main_soluciones.appendChild(form_solucion);
 }
 
+/**
+ * Método que crea el elemento small que indica si una respuesta es correcta o no o si no ha sido corregida aun. 
+ */
 function corregir_solucion() {
   var sol_id = this.id[9] + this.id[10];
   var checkbox_val = document.getElementById("input_correcta_" + sol_id)
